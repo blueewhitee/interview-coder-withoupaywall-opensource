@@ -60,7 +60,7 @@ export class ProcessingHelper {
     const questionType = configHelper.getQuestionType();
     
     if (questionType === "aptitude") {
-      return `You are an aptitude question interpreter. Analyze the screenshots of the aptitude/MCQ problem and extract all relevant information. Return the information in JSON format with these fields: problem_statement, options (as array), correct_answer, explanation. Just return the structured JSON without any other text.`;
+      return `You are an aptitude question interpreter. Analyze the screenshots and extract all MCQ/aptitude questions. If there are multiple questions, return an array of questions. If there's only one question, still return it as an array with one item. Return the information in JSON format as an array where each question has these fields: problem_statement, options (as array), correct_answer, explanation. Just return the structured JSON array without any other text.`;
     } else {
       return `You are a coding challenge interpreter. Analyze the screenshots of the coding problem and extract all relevant information. Return the information in JSON format with these fields: problem_statement, constraints, example_input, example_output. Just return the structured JSON without any other text. Preferred coding language we gonna use for this problem is ${language}.`;
     }
@@ -73,17 +73,46 @@ export class ProcessingHelper {
     const questionType = configHelper.getQuestionType();
     
     if (questionType === "aptitude") {
-      return `
+      // Handle both single question and array of questions
+      const questions = Array.isArray(problemInfo) ? problemInfo : [problemInfo];
+      
+      if (questions.length === 1) {
+        const q = questions[0];
+        return `
 Solve the following aptitude/MCQ question:
 
 QUESTION:
-${problemInfo.problem_statement}
+${q.problem_statement}
 
 OPTIONS:
-${problemInfo.options ? problemInfo.options.map((opt: string, idx: number) => `${String.fromCharCode(65 + idx)}. ${opt}`).join('\n') : 'No options provided.'}
+${q.options ? q.options.map((opt: string, idx: number) => `${String.fromCharCode(65 + idx)}. ${opt}`).join('\n') : 'No options provided.'}
 
 Just return the correct answer text only. Do not include the option letter (A, B, C, D). No explanations, no reasoning, no additional text. Only the actual answer content.
 `;
+      } else {
+        // Multiple questions
+        const questionsText = questions.map((q, qIdx) => `
+QUESTION ${qIdx + 1}:
+${q.problem_statement}
+
+OPTIONS:
+${q.options ? q.options.map((opt: string, idx: number) => `${String.fromCharCode(65 + idx)}. ${opt}`).join('\n') : 'No options provided.'}
+`).join('\n');
+
+        return `
+Solve the following aptitude/MCQ questions:
+
+${questionsText}
+
+Return only the correct answers in order, separated by newlines. Do not include option letters (A, B, C, D). No explanations, no reasoning, no additional text. Only the actual answer content for each question.
+
+Format:
+Answer 1
+Answer 2
+Answer 3
+...
+`;
+      }
     } else {
       return `
 Generate a detailed solution for the following coding problem:
