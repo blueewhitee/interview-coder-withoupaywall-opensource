@@ -20,9 +20,9 @@ export class ConfigHelper extends EventEmitter {
   private defaultConfig: Config = {
     apiKey: "",
     apiProvider: "gemini", // Default to Gemini
-    extractionModel: "gemini-2.0-flash", // Default to Flash for faster responses
-    solutionModel: "gemini-2.0-flash",
-    debuggingModel: "gemini-2.0-flash",
+    extractionModel: "gemini-2.5-pro", // Default to Pro for best performance
+    solutionModel: "gemini-2.5-pro",
+    debuggingModel: "gemini-2.5-pro",
     language: "python",
     opacity: 1.0
   };
@@ -68,8 +68,8 @@ export class ConfigHelper extends EventEmitter {
       }
       return model;
     } else if (provider === "gemini")  {
-      // Only allow gemini-1.5-pro and gemini-2.0-flash for Gemini
-      const allowedModels = ['gemini-1.5-pro', 'gemini-2.0-flash'];
+      // Only allow gemini-2.5-pro and gemini-2.0-flash for Gemini
+      const allowedModels = ['gemini-2.5-pro', 'gemini-2.0-flash'];
       if (!allowedModels.includes(model)) {
         console.warn(`Invalid Gemini model specified: ${model}. Using default model: gemini-2.0-flash`);
         return 'gemini-2.0-flash'; // Changed default to flash
@@ -179,9 +179,9 @@ export class ConfigHelper extends EventEmitter {
           updates.solutionModel = "claude-3-7-sonnet-20250219";
           updates.debuggingModel = "claude-3-7-sonnet-20250219";
         } else {
-          updates.extractionModel = "gemini-2.0-flash";
-          updates.solutionModel = "gemini-2.0-flash";
-          updates.debuggingModel = "gemini-2.0-flash";
+          updates.extractionModel = "gemini-2.5-pro";
+          updates.solutionModel = "gemini-2.5-pro";
+          updates.debuggingModel = "gemini-2.5-pro";
         }
       }
       
