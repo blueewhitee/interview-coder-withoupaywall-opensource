@@ -59,9 +59,13 @@ export interface ElectronAPI {
   checkApiKey: () => Promise<boolean>
   validateApiKey: (apiKey: string) => Promise<{ valid: boolean; error?: string }>
   openLink: (url: string) => void
-  onApiKeyInvalid: (callback: () => void) => () => void
-  removeListener: (eventName: string, callback: (...args: any[]) => void) => void
-}
+      onApiKeyInvalid: (callback: () => void) => () => void
+    removeListener: (eventName: string, callback: (...args: any[]) => void) => void
+    
+    // Question type management
+    getQuestionType: () => Promise<"dsa" | "aptitude">
+    setQuestionType: (questionType: "dsa" | "aptitude") => Promise<boolean>
+  }
 
 declare global {
   interface Window {

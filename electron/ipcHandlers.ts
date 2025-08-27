@@ -188,6 +188,16 @@ export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
     shell.openExternal(url)
   })
   
+  // Question type management
+  ipcMain.handle("get-question-type", async () => {
+    return deps.configHelper?.getQuestionType() || "dsa";
+  });
+
+  ipcMain.handle("set-question-type", async (event, questionType: "dsa" | "aptitude") => {
+    deps.configHelper?.setQuestionType(questionType);
+    return true;
+  });
+  
   // Open external URL handler
   ipcMain.handle("openLink", (event, url: string) => {
     try {

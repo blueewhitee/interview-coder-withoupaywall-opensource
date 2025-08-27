@@ -103,6 +103,7 @@ export interface IIpcHandlerDeps {
   toggleMainWindow: () => void
   clearQueues: () => void
   setView: (view: "queue" | "solutions" | "debug") => void
+  configHelper: typeof configHelper
   moveWindowLeft: () => void
   moveWindowRight: () => void
   moveWindowUp: () => void
@@ -545,6 +546,7 @@ async function initializeApp() {
       toggleMainWindow,
       clearQueues,
       setView,
+      configHelper,
       moveWindowLeft: () =>
         moveWindowHorizontal((x) =>
           Math.max(-(state.windowSize?.width || 0) / 2, x - state.step)

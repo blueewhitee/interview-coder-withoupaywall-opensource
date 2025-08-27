@@ -52,6 +52,68 @@ export class ProcessingHelper {
 
   // AbortControllers for API requests
   private currentProcessingAbortController: AbortController | null = null
+
+  /**
+   * Get extraction prompt based on question type
+   */
+  private getExtractionPrompt(language: string): string {
+    const questionType = configHelper.getQuestionType();
+    
+    if (questionType === "aptitude") {
+      return `You are an aptitude question interpreter. Analyze the screenshots of the aptitude/MCQ problem and extract all relevant information. Return the information in JSON format with these fields: problem_statement, options (as array), correct_answer, explanation. Just return the structured JSON without any other text.`;
+    } else {
+      return `You are a coding challenge interpreter. Analyze the screenshots of the coding problem and extract all relevant information. Return the information in JSON format with these fields: problem_statement, constraints, example_input, example_output. Just return the structured JSON without any other text. Preferred coding language we gonna use for this problem is ${language}.`;
+    }
+  }
+
+  /**
+   * Get solution prompt based on question type
+   */
+  private getSolutionPrompt(problemInfo: any, language: string): string {
+    const questionType = configHelper.getQuestionType();
+    
+    if (questionType === "aptitude") {
+      return `
+Solve the following aptitude/MCQ question:
+
+QUESTION:
+${problemInfo.problem_statement}
+
+OPTIONS:
+${problemInfo.options ? problemInfo.options.map((opt: string, idx: number) => `${String.fromCharCode(65 + idx)}. ${opt}`).join('\n') : 'No options provided.'}
+
+Just return the correct answer text only. Do not include the option letter (A, B, C, D). No explanations, no reasoning, no additional text. Only the actual answer content.
+`;
+    } else {
+      return `
+Generate a detailed solution for the following coding problem:
+
+PROBLEM STATEMENT:
+${problemInfo.problem_statement}
+
+CONSTRAINTS:
+${problemInfo.constraints || "No specific constraints provided."}
+
+EXAMPLE INPUT:
+${problemInfo.example_input || "No example input provided."}
+
+EXAMPLE OUTPUT:
+${problemInfo.example_output || "No example output provided."}
+
+LANGUAGE: ${language}
+
+I need the response in the following format:
+1. Code: A clean, optimized implementation in ${language}
+2. Your Thoughts: A list of key insights and reasoning behind your approach
+3. Time complexity: O(X) with a detailed explanation (at least 2 sentences)
+4. Space complexity: O(X) with a detailed explanation (at least 2 sentences)
+
+For complexity explanations, please be thorough. For example: "Time complexity: O(n) because we iterate through the array only once. This is optimal as we need to examine each element at least once to find the solution." or "Space complexity: O(n) because in the worst case, we store all elements in the hashmap. The additional space scales linearly with the input size."
+
+Your solution should be efficient, well-commented, and handle edge cases.
+`;
+    }
+  }
   private currentExtraProcessingAbortController: AbortController | null = null
 
   constructor(deps: IProcessingHelperDeps) {
@@ -531,7 +593,7 @@ export class ProcessingHelper {
               role: "user",
               parts: [
                 {
-                  text: `You are a coding challenge interpreter. Analyze the screenshots of the coding problem and extract all relevant information. Return the information in JSON format with these fields: problem_statement, constraints, example_input, example_output. Just return the structured JSON without any other text. Preferred coding language we gonna use for this problem is ${language}.`
+                  text: this.getExtractionPrompt(language)
                 },
                 ...imageDataList.map(data => ({
                   inlineData: {
@@ -544,8 +606,10 @@ export class ProcessingHelper {
           ];
 
           // Make API request to Gemini
+          const questionType = configHelper.getQuestionType();
+          const modelToUse = questionType === "aptitude" ? "gemini-2.5-flash-lite" : (config.extractionModel || "gemini-2.5-flash");
           const response = await axios.default.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/${config.extractionModel || "gemini-2.0-flash"}:generateContent?key=${this.geminiApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${this.geminiApiKey}`,
             {
               contents: geminiMessages,
               generationConfig: {
@@ -734,33 +798,7 @@ export class ProcessingHelper {
       }
 
       // Create prompt for solution generation
-      const promptText = `
-Generate a detailed solution for the following coding problem:
-
-PROBLEM STATEMENT:
-${problemInfo.problem_statement}
-
-CONSTRAINTS:
-${problemInfo.constraints || "No specific constraints provided."}
-
-EXAMPLE INPUT:
-${problemInfo.example_input || "No example input provided."}
-
-EXAMPLE OUTPUT:
-${problemInfo.example_output || "No example output provided."}
-
-LANGUAGE: ${language}
-
-I need the response in the following format:
-1. Code: A clean, optimized implementation in ${language}
-2. Your Thoughts: A list of key insights and reasoning behind your approach
-3. Time complexity: O(X) with a detailed explanation (at least 2 sentences)
-4. Space complexity: O(X) with a detailed explanation (at least 2 sentences)
-
-For complexity explanations, please be thorough. For example: "Time complexity: O(n) because we iterate through the array only once. This is optimal as we need to examine each element at least once to find the solution." or "Space complexity: O(n) because in the worst case, we store all elements in the hashmap. The additional space scales linearly with the input size."
-
-Your solution should be efficient, well-commented, and handle edge cases.
-`;
+      const promptText = this.getSolutionPrompt(problemInfo, language);
 
       let responseContent;
       
@@ -808,8 +846,10 @@ Your solution should be efficient, well-commented, and handle edge cases.
           ];
 
           // Make API request to Gemini
+          const questionType = configHelper.getQuestionType();
+          const modelToUse = questionType === "aptitude" ? "gemini-2.5-flash-lite" : (config.solutionModel || "gemini-2.5-flash");
           const response = await axios.default.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/${config.solutionModel || "gemini-2.0-flash"}:generateContent?key=${this.geminiApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${this.geminiApiKey}`,
             {
               contents: geminiMessages,
               generationConfig: {
@@ -1130,7 +1170,7 @@ If you include code examples, use proper markdown code blocks with language spec
           }
 
           const response = await axios.default.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/${config.debuggingModel || "gemini-2.0-flash"}:generateContent?key=${this.geminiApiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${config.debuggingModel || "gemini-2.5-flash"}:generateContent?key=${this.geminiApiKey}`,
             {
               contents: geminiMessages,
               generationConfig: {

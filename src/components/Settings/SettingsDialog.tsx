@@ -55,9 +55,14 @@ const modelCategories: ModelCategory[] = [
         description: "Best overall performance for problem extraction"
       },
       {
-        id: "gemini-2.0-flash",
-        name: "Gemini 2.0 Flash",
+        id: "gemini-2.5-flash",
+        name: "Gemini 2.5 Flash",
         description: "Faster, more cost-effective option"
+      },
+      {
+        id: "gemini-2.5-flash-lite",
+        name: "Gemini 2.5 Flash Lite",
+        description: "Ultra-fast, optimized for simple questions"
       }
     ],
     anthropicModels: [
@@ -101,9 +106,14 @@ const modelCategories: ModelCategory[] = [
         description: "Strong overall performance for coding tasks"
       },
       {
-        id: "gemini-2.0-flash",
-        name: "Gemini 2.0 Flash",
+        id: "gemini-2.5-flash",
+        name: "Gemini 2.5 Flash",
         description: "Faster, more cost-effective option"
+      },
+      {
+        id: "gemini-2.5-flash-lite",
+        name: "Gemini 2.5 Flash Lite",
+        description: "Ultra-fast, optimized for simple questions"
       }
     ],
     anthropicModels: [
@@ -147,9 +157,14 @@ const modelCategories: ModelCategory[] = [
         description: "Best for analyzing code and error messages"
       },
       {
-        id: "gemini-2.0-flash",
-        name: "Gemini 2.0 Flash",
+        id: "gemini-2.5-flash",
+        name: "Gemini 2.5 Flash",
         description: "Faster, more cost-effective option"
+      },
+      {
+        id: "gemini-2.5-flash-lite",
+        name: "Gemini 2.5 Flash Lite",
+        description: "Ultra-fast, optimized for simple questions"
       }
     ],
     anthropicModels: [
@@ -244,9 +259,9 @@ export function SettingsDialog({ open: externalOpen, onOpenChange }: SettingsDia
       setSolutionModel("gpt-4o");
       setDebuggingModel("gpt-4o");
     } else if (provider === "gemini") {
-      setExtractionModel("gemini-2.5-pro");
-      setSolutionModel("gemini-2.5-pro");
-      setDebuggingModel("gemini-2.5-pro");
+      setExtractionModel("gemini-2.5-flash");
+      setSolutionModel("gemini-2.5-flash");
+      setDebuggingModel("gemini-2.5-flash");
     } else if (provider === "anthropic") {
       setExtractionModel("claude-3-7-sonnet-20250219");
       setSolutionModel("claude-3-7-sonnet-20250219");
@@ -464,8 +479,11 @@ export function SettingsDialog({ open: externalOpen, onOpenChange }: SettingsDia
                 <div className="text-white/70">Toggle Visibility</div>
                 <div className="text-white/90 font-mono">Ctrl+B / Cmd+B</div>
                 
-                <div className="text-white/70">Take Screenshot</div>
+                <div className="text-white/70">Take Screenshot (DSA)</div>
                 <div className="text-white/90 font-mono">Ctrl+H / Cmd+H</div>
+                
+                <div className="text-white/70">MCQ</div>
+                <div className="text-white/90 font-mono">Ctrl+P / Cmd+P</div>
                 
                 <div className="text-white/70">Process Screenshots</div>
                 <div className="text-white/90 font-mono">Ctrl+Enter / Cmd+Enter</div>

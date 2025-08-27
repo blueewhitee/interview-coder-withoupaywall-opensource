@@ -12,6 +12,7 @@ interface Config {
   solutionModel: string;
   debuggingModel: string;
   language: string;
+  questionType: "dsa" | "aptitude";  // Current question type
   opacity: number;
 }
 
@@ -20,10 +21,11 @@ export class ConfigHelper extends EventEmitter {
   private defaultConfig: Config = {
     apiKey: "",
     apiProvider: "gemini", // Default to Gemini
-    extractionModel: "gemini-2.5-pro", // Default to Pro for best performance
-    solutionModel: "gemini-2.5-pro",
-    debuggingModel: "gemini-2.5-pro",
+    extractionModel: "gemini-2.5-flash", // Default to Flash for cost-effectiveness
+    solutionModel: "gemini-2.5-flash",
+    debuggingModel: "gemini-2.5-flash",
     language: "python",
+    questionType: "dsa", // Default to DSA questions
     opacity: 1.0
   };
 
@@ -68,11 +70,11 @@ export class ConfigHelper extends EventEmitter {
       }
       return model;
     } else if (provider === "gemini")  {
-      // Only allow gemini-2.5-pro and gemini-2.0-flash for Gemini
-      const allowedModels = ['gemini-2.5-pro', 'gemini-2.0-flash'];
+      // Only allow gemini-2.5-pro, gemini-2.5-flash, and gemini-2.5-flash-lite for Gemini
+      const allowedModels = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'];
       if (!allowedModels.includes(model)) {
-        console.warn(`Invalid Gemini model specified: ${model}. Using default model: gemini-2.0-flash`);
-        return 'gemini-2.0-flash'; // Changed default to flash
+        console.warn(`Invalid Gemini model specified: ${model}. Using default model: gemini-2.5-flash`);
+        return 'gemini-2.5-flash'; // Default to latest flash
       }
       return model;
     }  else if (provider === "anthropic") {
@@ -179,9 +181,9 @@ export class ConfigHelper extends EventEmitter {
           updates.solutionModel = "claude-3-7-sonnet-20250219";
           updates.debuggingModel = "claude-3-7-sonnet-20250219";
         } else {
-          updates.extractionModel = "gemini-2.5-pro";
-          updates.solutionModel = "gemini-2.5-pro";
-          updates.debuggingModel = "gemini-2.5-pro";
+          updates.extractionModel = "gemini-2.5-flash";
+          updates.solutionModel = "gemini-2.5-flash";
+          updates.debuggingModel = "gemini-2.5-flash";
         }
       }
       
@@ -283,6 +285,21 @@ export class ConfigHelper extends EventEmitter {
    */
   public setLanguage(language: string): void {
     this.updateConfig({ language });
+  }
+  
+  /**
+   * Get the current question type
+   */
+  public getQuestionType(): "dsa" | "aptitude" {
+    const config = this.loadConfig();
+    return config.questionType || "dsa";
+  }
+
+  /**
+   * Set the question type
+   */
+  public setQuestionType(questionType: "dsa" | "aptitude"): void {
+    this.updateConfig({ questionType });
   }
   
   /**

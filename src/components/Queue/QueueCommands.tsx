@@ -156,6 +156,36 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
             </div>
           </div>
 
+          {/* Aptitude Screenshot Command */}
+          <div
+            className="flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
+            onClick={async () => {
+              try {
+                await window.electronAPI.setQuestionType("aptitude");
+                const result = await window.electronAPI.triggerScreenshot()
+                if (!result.success) {
+                  console.error("Failed to take screenshot:", result.error)
+                  showToast("Error", "Failed to take screenshot", "error")
+                }
+              } catch (error) {
+                console.error("Error taking screenshot:", error)
+                showToast("Error", "Failed to take screenshot", "error")
+              }
+            }}
+          >
+            <span className="text-[11px] leading-none truncate">
+              MCQ
+            </span>
+            <div className="flex gap-1">
+              <button className="bg-white/10 rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+                {COMMAND_KEY}
+              </button>
+              <button className="bg-white/10 rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+                P
+              </button>
+            </div>
+          </div>
+
           {/* Solve Command */}
           {screenshotCount > 0 && (
             <div

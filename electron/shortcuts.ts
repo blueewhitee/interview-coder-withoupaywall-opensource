@@ -38,8 +38,10 @@ export class ShortcutsHelper {
     globalShortcut.register("CommandOrControl+H", async () => {
       const mainWindow = this.deps.getMainWindow()
       if (mainWindow) {
-        console.log("Taking screenshot...")
+        console.log("Taking DSA screenshot...")
         try {
+          // Set question type to DSA before taking screenshot
+          configHelper.setQuestionType("dsa");
           const screenshotPath = await this.deps.takeScreenshot()
           const preview = await this.deps.getImagePreview(screenshotPath)
           mainWindow.webContents.send("screenshot-taken", {
@@ -48,6 +50,26 @@ export class ShortcutsHelper {
           })
         } catch (error) {
           console.error("Error capturing screenshot:", error)
+        }
+      }
+    })
+
+    // New shortcut for aptitude questions (Ctrl+P)
+    globalShortcut.register("CommandOrControl+P", async () => {
+      const mainWindow = this.deps.getMainWindow()
+      if (mainWindow) {
+        console.log("Taking aptitude screenshot...")
+        try {
+          // Set question type to aptitude before taking screenshot
+          configHelper.setQuestionType("aptitude");
+          const screenshotPath = await this.deps.takeScreenshot()
+          const preview = await this.deps.getImagePreview(screenshotPath)
+          mainWindow.webContents.send("screenshot-taken", {
+            path: screenshotPath,
+            preview
+          })
+        } catch (error) {
+          console.error("Error capturing aptitude screenshot:", error)
         }
       }
     })
